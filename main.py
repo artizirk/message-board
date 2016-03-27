@@ -71,13 +71,11 @@ html = """<!DOCTYPE html>
 
         {content}
 
-        <p>
-         <form action="/submit" method="post">
+        <form action="/submit" method="post">
           Add a message:&nbsp
           <input type="text" name="message" value="" required autofocus>
           <input type="submit" value="Submit">
-        </form> 
-        </p>
+        </form>
         <hr>
         <small><a href="https://github.com/artizirk/message-board" style="color:black;">Source code</a></small>,  <small>Good luck!</small>
     </body>
@@ -149,8 +147,6 @@ def application(env, start_response):
         start_response("200 OK", [('Content-Type', 'application/json')])
         return [json.dumps(list(messages), indent=4).encode()]
 
-    
-    
 
     start_response('200 OK', [('Content-Type', 'text/html')])
     content = []
