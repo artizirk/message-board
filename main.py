@@ -76,7 +76,10 @@ default = [
     "need to wrap system in aluminum foil to fix problem",
     "Typo in the code"
 ]
-messages = deque(["BOFH excuse #{}: {}".format(i, x) for i, x in enumerate(default)], maxlen=max_nr_messages)
+
+default = ["BOFH excuse #{}: {}".format(i, x) for i, x in enumerate(default)]
+
+messages = deque(default, maxlen=max_nr_messages)
 
 def application(env, start_response):
 
@@ -113,6 +116,10 @@ def application(env, start_response):
         start_response("303 See Other", [('Content-Type', 'application/json'),
                                          ('Location', '/')])
         return [b"OK"]
+
+    if env["PATH_INFO"] == "/clear":
+        messages.clear()
+        messages.extendleft(default)
 
     if env["PATH_INFO"] == "/favicon.ico":
         start_response('200 OK', [('Content-Type', 'image/x-icon')])
