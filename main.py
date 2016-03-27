@@ -120,6 +120,9 @@ def application(env, start_response):
     if env["PATH_INFO"] == "/clear":
         messages.clear()
         messages.extendleft(default)
+        start_response("303 See Other", [('Content-Type', 'application/json'),
+                                         ('Location', '/')])
+        return [b"OK"]
 
     if env["PATH_INFO"] == "/favicon.ico":
         start_response('200 OK', [('Content-Type', 'image/x-icon')])
