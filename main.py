@@ -33,7 +33,7 @@ html = """<!DOCTYPE html>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Message Board</title>
-        <meta name="description" content="HTTP 7XX ERROR message generator">
+        <meta name="description" content="A simple message board written in python">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
