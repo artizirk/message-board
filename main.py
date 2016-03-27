@@ -63,7 +63,7 @@ html = """<!DOCTYPE html>
         </form> 
         </p>
         <hr>
-        <small><a href="https://github.com/artizirk/" style="color:black;">Source code</a></small>,  <small>Good luck!</small>
+        <small><a href="https://github.com/artizirk/message-board" style="color:black;">Source code</a></small>,  <small>Good luck!</small>
     </body>
 </html>
 """
