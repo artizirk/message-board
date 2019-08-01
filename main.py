@@ -59,6 +59,10 @@ html = """<!DOCTYPE html>
             margin: 1em 0;
             padding: 0;
         }}
+        .error {{
+            background: #f55;
+            color: #000;
+        }}
         </style>
     </head>
     <body>
@@ -67,9 +71,11 @@ html = """<!DOCTYPE html>
         <![endif]-->
 
         <h1>Message Board</h1>
-        <p>Last {msg_count} messages left here</p>
+        <p>Last <span id=msg_count>{msg_count}</span> messages left here</p>
 
+        <span id=content>
         {content}
+        </span>
 
         <form action="/submit" method="post">
           Add a message:&nbsp
@@ -78,11 +84,35 @@ html = """<!DOCTYPE html>
         </form>
         <hr>
         <small><a href="https://github.com/artizirk/message-board" style="color:black;">Source code</a></small>,  <small>Good luck!</small>
+
+        <script src="/app.js"></script>
     </body>
 </html>
 """
 
 favicon = b'AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA/4cAAP+7AAD/uwAA/7sAAP+HAAD/uwAAvrsAAL67AAC+hwAAvv8AALb/AACi/wAAiP8AAJz/AAD//wAA'
+
+appjs = """
+let interval_id = window.setInterval(function(){
+    var el_msg_count = document.getElementById("msg_count");
+    var el_content = document.getElementById("content");
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function(){
+        if (httpRequest.readyState === XMLHttpRequest.DONE) {
+          if (httpRequest.status === 200) {
+            el_content.innerHTML = httpRequest.responseText;
+            el_msg_count.innerHTML = el_content.childNodes[0].childElementCount;
+          } else {
+            window.clearInterval(interval_id);
+            el_content.innerHTML += '<p class=error>There was a problem with the chat update, reload the page to try again.</p>';
+          }
+        }
+    };
+    httpRequest.open('GET', '/htmlfragment?' + (new Date()).getTime());
+    httpRequest.send();
+
+}, 1000);
+"""
 
 default = [
     "divide-by-zero error",
@@ -142,6 +172,9 @@ def application(env, start_response):
         start_response('200 OK', [('Content-Type', 'image/x-icon')])
         return [base64.b64decode(favicon)]
 
+    if env["PATH_INFO"] == "/app.js":
+        start_response('200 OK', [('Content-Type', 'text/javascript')])
+        return[appjs.encode()]
 
     if env["PATH_INFO"] == "/json" or 'HTTP_USER_AGENT' in env and env['HTTP_USER_AGENT'].startswith(('python-requests', 'HTTPie', 'curl', 'Wget')):
         start_response("200 OK", [('Content-Type', 'application/json')])
@@ -153,6 +186,8 @@ def application(env, start_response):
     for message in list(messages):
         content.append("          <li>{}</li>\n".format(message))
     content = "<ol>\n{}        </ol>".format("".join(content))
+    if env["PATH_INFO"] == "/htmlfragment":
+        return [content.encode()]
     return [html.format(msg_count=len(messages), content=content).encode()]
 
 
