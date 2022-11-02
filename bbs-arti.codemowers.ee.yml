@@ -1,0 +1,64 @@
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bbs
+  labels:
+    app: bbs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bbs
+  template:
+    metadata:
+      labels:
+        app: bbs
+    spec:
+      containers:
+        - name: bbs
+          image: harbor.k-space.ee/arti/message-board:latest
+          ports:
+            - name: web
+              containerPort: 8080
+              protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bbs
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    external-dns.alpha.kubernetes.io/target: traefik-edgbz.codemowers.ee
+spec:
+  rules:
+  - host: bbs-arti.codemowers.ee
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: bbs
+            port:
+              number: 8080
+  tls:
+  - hosts:
+    - "*.codemowers.ee"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bbs
+  labels:
+    app: bbs
+spec:
+  selector:
+    app: bbs
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
